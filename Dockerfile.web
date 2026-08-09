@@ -1,0 +1,28 @@
+FROM codewithcj/sparkyfitness:v1.6.1
+
+# Railway wrapper for the SparkyFitness frontend (nginx + built React app).
+#
+#   1. The auth rate limiter is re-keyed off the first X-Forwarded-For address.
+#      Upstream keys it on $binary_remote_addr, which behind Railway's edge is
+#      the same handful of addresses for every visitor on earth, so the 5r/s
+#      login/signup limit is one shared bucket instead of one per client.
+#   2. The listener follows Railway's injected $PORT, so the platform's
+#      healthcheck (which dials the injected port, not the domain's target
+#      port) actually reaches nginx.
+#   3. The backend is reached over Railway's PRIVATE network, so no second
+#      public domain and no TLS re-entry through the public edge.
+
+COPY nginx.conf /etc/nginx/templates/default.conf.template
+COPY railway-entrypoint-web.sh /usr/local/bin/railway-entrypoint.sh
+RUN chmod +x /usr/local/bin/railway-entrypoint.sh
+
+ENV NGINX_RATE_LIMIT=5r/s \
+    NGINX_ACCESS_LOG=/dev/stdout \
+    NGINX_ERROR_LOG=/dev/stderr \
+    SPARKY_FITNESS_SERVER_PORT=3010
+
+EXPOSE 8080
+# The upstream image OVERWRITES nginx's own /docker-entrypoint.sh, and the base
+# image's ENTRYPOINT still points at that path — so a CMD here would never run.
+HEALTHCHECK NONE
+ENTRYPOINT ["/usr/local/bin/railway-entrypoint.sh"]

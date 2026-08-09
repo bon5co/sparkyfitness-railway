@@ -1,0 +1,27 @@
+FROM codewithcj/sparkyfitness_server:v1.6.1
+
+# Railway wrapper for the SparkyFitness backend.
+#
+# Adds three things the marketplace listings do not have:
+#   1. an admin account seeded from the deploy's generated password, created
+#      before the public port ever serves a request, with signup closed
+#      afterwards (upstream leaves signup open, so the first stranger who
+#      finds the URL registers on the deployer's instance);
+#   2. persistent uploads/backup directories pointed at the Railway volume;
+#   3. literal defaults baked in, so the deploy form does not ask for them.
+
+ENV SPARKY_FITNESS_CUSTOM_UPLOADS_DIRECTORY=/data/uploads \
+    SPARKY_FITNESS_CUSTOM_BACKUP_DIRECTORY=/data/backup \
+    SPARKY_FITNESS_SERVER_PORT=3010 \
+    SPARKY_FITNESS_APP_DB_USER=sparkyapp \
+    SPARKY_FITNESS_DB_PORT=5432 \
+    SPARKY_FITNESS_LOG_LEVEL=INFO \
+    SPARKY_FITNESS_FORCE_EMAIL_LOGIN=true \
+    NODE_ENV=production \
+    TZ=Etc/UTC
+
+COPY railway-entrypoint-server.sh /usr/local/bin/railway-entrypoint.sh
+RUN chmod +x /usr/local/bin/railway-entrypoint.sh
+
+EXPOSE 3010
+ENTRYPOINT ["/usr/local/bin/railway-entrypoint.sh"]
