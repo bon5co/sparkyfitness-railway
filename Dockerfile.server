@@ -10,7 +10,13 @@ FROM codewithcj/sparkyfitness_server:v1.6.1
 #   2. persistent uploads/backup directories pointed at the Railway volume;
 #   3. literal defaults baked in, so the deploy form does not ask for them.
 
-ENV SPARKY_FITNESS_CUSTOM_UPLOADS_DIRECTORY=/data/uploads \
+# Every literal lives here rather than in the template: `templateGenerate` drops a
+# variable's default unless it is a Railway expression, so a literal shipped as a
+# template variable publishes as a blank REQUIRED field on the deploy form.
+ENV SPARKY_FITNESS_DB_NAME=postgres \
+    SPARKY_FITNESS_DB_USER=postgres \
+    SPARKY_FITNESS_ADMIN_EMAIL=admin@example.com \
+    SPARKY_FITNESS_CUSTOM_UPLOADS_DIRECTORY=/data/uploads \
     SPARKY_FITNESS_CUSTOM_BACKUP_DIRECTORY=/data/backup \
     SPARKY_FITNESS_SERVER_PORT=3010 \
     SPARKY_FITNESS_APP_DB_USER=sparkyapp \
