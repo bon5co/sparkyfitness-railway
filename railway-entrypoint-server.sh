@@ -22,6 +22,19 @@ if [ "${#SPARKY_FITNESS_ADMIN_PASSWORD}" -lt 8 ]; then
   exit 1
 fi
 
+# SPARKY_FITNESS_FRONTEND_URL is a reference to the web service's public domain.
+# If that service has no domain yet the reference resolves to the empty string and
+# the value arrives as a bare scheme, which better-auth turns into
+# `TypeError: Invalid URL` at import time — the process exits before it listens and
+# the only symptom at the edge is nginx 502. Fall back so the server still boots;
+# CORS and auth callbacks then need the real domain, which the next deploy picks up.
+case "${SPARKY_FITNESS_FRONTEND_URL:-}" in
+  https://|http://|"")
+    log "WARN: SPARKY_FITNESS_FRONTEND_URL is unresolved ('${SPARKY_FITNESS_FRONTEND_URL:-}'); falling back to http://localhost:8080"
+    export SPARKY_FITNESS_FRONTEND_URL="http://localhost:8080"
+    ;;
+esac
+
 UPLOADS_DIR="${SPARKY_FITNESS_CUSTOM_UPLOADS_DIRECTORY:-/data/uploads}"
 BACKUP_DIR="${SPARKY_FITNESS_CUSTOM_BACKUP_DIRECTORY:-/data/backup}"
 mkdir -p "$UPLOADS_DIR" "$BACKUP_DIR"
