@@ -25,4 +25,14 @@ until getent ahosts "${SPARKY_FITNESS_SERVER_HOST}" >/dev/null 2>&1; do
 done
 echo "[railway-entrypoint] backend resolved after ${i}s"
 
+# Upstream's entrypoint envsubst's a fixed list of variables, so the resolver
+# address cannot ride along as one — substitute it here instead.
+NGINX_RESOLVER="$(awk '/^nameserver/ {print $2; exit}' /etc/resolv.conf)"
+case "$NGINX_RESOLVER" in
+  *:*) NGINX_RESOLVER="[${NGINX_RESOLVER}]" ;;   # bracket IPv6 for nginx
+  '')  NGINX_RESOLVER='127.0.0.11' ;;
+esac
+echo "[railway-entrypoint] nginx resolver=${NGINX_RESOLVER}"
+sed -i "s|__NGINX_RESOLVER__|${NGINX_RESOLVER}|g" /etc/nginx/templates/default.conf.template
+
 exec /docker-entrypoint.sh
