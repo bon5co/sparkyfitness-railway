@@ -1,5 +1,9 @@
 # sparkyfitness-railway
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/sparkyfitness-v161-or-myfitnesspal-alter?referralCode=Z1xivh&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
+**Deploy on Railway:** [SparkyFitness template](https://railway.com/deploy/sparkyfitness-v161-or-myfitnesspal-alter?referralCode=Z1xivh&utm_medium=integration&utm_source=template&utm_campaign=generic)
+
 Railway wrapper images for [SparkyFitness](https://github.com/CodeWithCJ/SparkyFitness)
 v1.6.1 — the self-hosted MyFitnessPal alternative (food, exercise, water, weight,
 check-in photos, AI coach, MCP server).
